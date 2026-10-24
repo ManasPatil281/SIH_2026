@@ -166,12 +166,22 @@ Browser
 
 ### Technology
 
-- **UI:** React 19, TypeScript, React Router 7
-- **Build and local server:** Vite 8
-- **Styling:** Tailwind CSS 4 and project CSS
-- **Icons and interaction:** Lucide React and Motion
-- **Demo data:** in-repository TypeScript seed data and handbook passages
-- **Persistence:** browser `localStorage`
+- **Frontend:** React 19, TypeScript
+- **Build tool:** Vite 8
+- **Styling:** Tailwind CSS 4, custom CSS
+- **Routing:** React Router 7
+- **UI icons:** Lucide React
+- **AI agent frameworks:** LangChain, LangGraph
+- **LLM integration:** Google Gemini API
+- **Database:** Firebase Firestore
+- **Authentication:** Firebase Authentication
+- **State management:** React Context API
+- **Backend:** Node.js, Express.js
+- **Development tools:** npm, TypeScript, Vite
+- **AI architecture:** LangChain for agent and tool integration; LangGraph for stateful, multi-step agent workflows.
+- **Data layer:** Firebase Firestore for application data storage and Firebase Authentication for user identity management.
+
+The current demonstration still uses seeded in-repository data, browser `localStorage`, and deterministic local agent simulations. Firebase services, LangChain/LangGraph workflows, and production backend integrations are not implemented in this prototype; the stack above describes the target application architecture.
 
 ### Important implementation interpretation
 

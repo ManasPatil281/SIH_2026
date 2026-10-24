@@ -6,3 +6,7 @@ coverage/
 *.log
 .env*
 !.env.example
+
+
+git config --global user.name "ManasPatil281"
+git config --global user.email "manaspatil281@gmail.com"

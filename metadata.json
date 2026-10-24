@@ -1,0 +1,6 @@
+{
+  "name": "AADHAR — AI-Assisted Regulatory Scrutiny Portal",
+  "description": "AICTE-inspired regulatory scrutiny portal demonstrating role-based access control, specialized AI agents, document verification, Agentic RAG, approvals, and audit trails for Smart India Hackathon.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

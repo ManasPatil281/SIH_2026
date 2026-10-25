@@ -17,6 +17,12 @@ export const DocumentPreviewPanel: React.FC<DocumentPreviewPanelProps> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const displayFileName = uploadedFileName || document.fileName;
+  const isVesitDocument = document.id.startsWith('doc-vesit-');
+  const instituteName = isVesitDocument
+    ? 'VES Institute of Technology'
+    : 'Dr. Bapuji Salunkhe Institute';
+  const instituteLocation = isVesitDocument ? 'Chembur, Mumbai' : 'Kolhapur, Maharashtra';
+  const instituteLogo = isVesitDocument ? 'VESIT' : 'BSIET';
 
   return (
     <section className={`rounded-xl border border-slate-200 bg-slate-50/70 ${compact ? 'p-3' : 'p-4'}`}>
@@ -68,10 +74,10 @@ export const DocumentPreviewPanel: React.FC<DocumentPreviewPanelProps> = ({
           <div className="p-3 min-h-[285px] flex justify-center">
             <div className="w-full max-w-[310px] min-h-[265px] rounded-sm bg-white border border-slate-300 shadow-md p-4 relative overflow-hidden">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded bg-[#0F294A] text-white flex items-center justify-center text-[10px] font-bold">BSIET</div>
+                <div className="w-8 h-8 rounded bg-[#0F294A] text-white flex items-center justify-center text-[10px] font-bold">{instituteLogo}</div>
                 <div>
-                  <div className="text-[10px] font-bold text-slate-900 uppercase">Dr. Bapuji Salunkhe Institute</div>
-                  <div className="text-[9px] text-slate-500">Kolhapur, Maharashtra · Synthetic test evidence</div>
+                  <div className="text-[10px] font-bold text-slate-900 uppercase">{instituteName}</div>
+                  <div className="text-[9px] text-slate-500">{instituteLocation} · Synthetic test evidence</div>
                 </div>
               </div>
               <div className="text-[11px] font-bold text-slate-800 border-b border-slate-300 pb-2 mb-2">

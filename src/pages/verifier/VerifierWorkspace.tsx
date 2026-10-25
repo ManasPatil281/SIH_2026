@@ -41,7 +41,7 @@ export const VerifierWorkspace: React.FC = () => {
   else if (path.includes('/validity')) activeTab = 'validity';
 
   const [selectedDocId, setSelectedDocId] = useState<string>(
-    appCase.documents.find((d) => d.status !== 'VERIFIED')?.id || appCase.documents[3]?.id || 'doc-004'
+    appCase.documents.find((d) => d.status !== 'VERIFIED')?.id || appCase.documents[3]?.id || appCase.documents[0]?.id
   );
   const [decisionNotes, setDecisionNotes] = useState(
     'Synthetic inventory and supporting records compared. The submission lists 16 department computers; installation and availability evidence remain subject to human verification under Annexure 4, Section 4.1.'
@@ -49,6 +49,20 @@ export const VerifierWorkspace: React.FC = () => {
   const [uploadedPreviewName, setUploadedPreviewName] = useState<string>();
   const [showLiveAutomation, setShowLiveAutomation] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  React.useEffect(() => {
+    const unverified = appCase.documents.find((d) => d.status !== 'VERIFIED');
+    setSelectedDocId(unverified?.id || appCase.documents[0]?.id || '');
+    if (appCase.id === 'NIVARAN-VESIT-2026-27') {
+      setDecisionNotes(
+        'Verified 30-year registered lease deed with Sub-Registrar Kurla-4 index II and MCGM building sanction approvals for VESIT Chembur campus. Continuous 3.2 acres instructional area certified compliant with APH Chapter I.'
+      );
+    } else {
+      setDecisionNotes(
+        'Synthetic inventory and supporting records compared. The submission lists 16 department computers; installation and availability evidence remain subject to human verification under Annexure 4, Section 4.1.'
+      );
+    }
+  }, [appCase.id]);
 
   const selectedDoc = appCase.documents.find((d) => d.id === selectedDocId) || appCase.documents[0];
 

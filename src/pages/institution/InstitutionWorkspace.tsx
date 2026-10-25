@@ -51,7 +51,24 @@ export const InstitutionWorkspace: React.FC = () => {
     'This is a simulated response for the Dr. Bapuji Salunkhe Institute and is not a claim about the real institution. We are submitting an updated department inventory, installation record, availability evidence, and corroborating purchase records for human review against AICTE Approval Process Handbook 2024–25 to 2026–27, Annexure 4, Section 4.1.'
   );
   const [attachedFileName, setAttachedFileName] = useState('BSIET_CSE_AIML_Updated_Inventory_Synthetic.pdf');
-  const previewDocument = appCase.documents.find((doc) => doc.id === 'doc-004') || appCase.documents[0];
+
+  React.useEffect(() => {
+    if (appCase.id === 'NIVARAN-VESIT-2026-27') {
+      setTargetClrId(appCase.clarifications[0]?.id || 'clr-vesit-001');
+      setResponseText(
+        'Response from Vivekanand Education Society (VESIT Chembur): Submitting registered 30-year lease deed endorsement from Sub-Registrar Kurla-4 (valid till 30-Nov-2056) and Phase-1 MCGM occupancy certificate with approved master building layout.'
+      );
+      setAttachedFileName('VESIT_Lease_Endorsement_Receipt_2026.pdf');
+    } else {
+      setTargetClrId(appCase.clarifications[0]?.id || 'clr-001');
+      setResponseText(
+        'This is a simulated response for the Dr. Bapuji Salunkhe Institute and is not a claim about the real institution. We are submitting an updated department inventory, installation record, availability evidence, and corroborating purchase records for human review against AICTE Approval Process Handbook 2024–25 to 2026–27, Annexure 4, Section 4.1.'
+      );
+      setAttachedFileName('BSIET_CSE_AIML_Updated_Inventory_Synthetic.pdf');
+    }
+  }, [appCase.id]);
+
+  const previewDocument = appCase.documents.find((doc) => doc.id === 'doc-004' || doc.id === 'doc-vesit-001') || appCase.documents[0];
 
   const handleSubmitResponse = (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,7 +141,7 @@ export const InstitutionWorkspace: React.FC = () => {
             <strong>Applicant Isolation Boundary Enforced:</strong> Internal reviewer deliberations and other institutions' dockets are inaccessible.
           </span>
         </div>
-        <span className="font-mono text-[10px] text-blue-800">DIT-MH-0492 Scope</span>
+        <span className="font-mono text-[10px] text-blue-800">{appCase.institutionCode} Scope</span>
       </div>
 
       {/* 1. Dashboard & Status View */}
@@ -174,7 +191,7 @@ export const InstitutionWorkspace: React.FC = () => {
                 }`}>
                   <span className="font-bold block">4. Final Decision</span>
                   <span className="text-[11px]">
-                    {appCase.status === 'APPROVED' ? 'Approved (60 Seats)' : 'Awaiting Completion'}
+                    {appCase.status === 'APPROVED' ? `Approved (${appCase.intakeProposed} Seats)` : 'Awaiting Completion'}
                   </span>
                 </div>
               </div>
@@ -196,7 +213,10 @@ export const InstitutionWorkspace: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-amber-900 leading-relaxed">
-                Scrutiny Reviewer Dr. Arvind Joshi has flagged a shortfall of 10 department computers in CSE Department Computer Laboratory. Please provide purchase proof and installation challan before the statutory deadline.
+                {appCase.clarifications.find((c) => c.status === 'PENDING_INSTITUTION')?.question ||
+                  (appCase.id === 'NIVARAN-VESIT-2026-27'
+                    ? 'Scrutiny reviewer has raised clarification regarding lease deed validity and building occupancy phasing for VESIT Chembur.'
+                    : 'Scrutiny Reviewer Dr. Arvind Joshi has flagged a shortfall of 10 department computers in CSE Department Computer Laboratory. Please provide purchase proof and installation challan before the statutory deadline.')}
               </p>
               <div className="pt-1 flex items-center gap-3">
                 <button

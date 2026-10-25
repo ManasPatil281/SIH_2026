@@ -49,6 +49,26 @@ export const DecisionWorkspace: React.FC = () => {
     '1. Completion of tactile paving in external courtyard prior to academic session.\n2. Compliance with mandatory biometric faculty attendance portal.'
   );
 
+  React.useEffect(() => {
+    if (appCase.id === 'NIVARAN-VESIT-2026-27') {
+      setResolutionNo('SAC-WR-2026-VESIT-0118');
+      setRationale(
+        "Standing Appellate Committee (SAC) brief for Vivekanand Education Society's Institute of Technology (VESIT), Chembur. Application for Setting up New Technical Institution. 30-year registered lease deed, ₹1 Crore FDR joint endowment pledge, and AICTE emerging curricula alignment verified under APH Chapter I Clause 1.8."
+      );
+      setConditionText(
+        '1. Completion of Sub-Registrar lease annual rent endorsement receipt filing before 30-Nov-2026.\n2. Final compliance submission of Phase-2 IoT hardware laboratory procurement invoice.'
+      );
+    } else {
+      setResolutionNo('SHC-WR-2026-BSIET-0492');
+      setRationale(
+        'Simulated committee brief for Dr. Bapuji Salunkhe Institute and a simulated 2026–27 EoA application. Public historical reports are reference context only. The synthetic computer inventory and supporting evidence require authorised human verification against AICTE Approval Process Handbook 2024–25 to 2026–27, Annexure 4, Section 4.1.'
+      );
+      setConditionText(
+        '1. Completion of tactile paving in external courtyard prior to academic session.\n2. Compliance with mandatory biometric faculty attendance portal.'
+      );
+    }
+  }, [appCase.id]);
+
   const gates = {
     ...appCase.decisionDetails.gatesPassed,
     documentVerification:
@@ -250,7 +270,9 @@ export const DecisionWorkspace: React.FC = () => {
               </div>
               {!gates.clarificationsResolved && (
                 <p className="text-[11px] text-amber-800 mt-3">
-                  For CLR/2026/01: the institution must submit its response, the Document Verifier must sign off the updated evidence, and Dr. Arvind Joshi must select <strong>Sign Off &amp; Resolve Clarification</strong>.
+                  {appCase.id === 'NIVARAN-VESIT-2026-27'
+                    ? 'For CLR/2026/02: VESIT has submitted lease endorsement details; Reviewer must sign off and resolve the clarification.'
+                    : 'For CLR/2026/01: the institution must submit its response, the Document Verifier must sign off the updated evidence, and Dr. Arvind Joshi must select Sign Off & Resolve Clarification.'}
                 </p>
               )}
             </div>

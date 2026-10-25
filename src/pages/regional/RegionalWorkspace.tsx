@@ -23,7 +23,7 @@ import {
 import { OperationsControlCenter } from '../../components/common/OperationsControlCenter';
 
 export const RegionalWorkspace: React.FC = () => {
-  const { appCase, currentUser, assignReviewer, notifications } = useApp();
+  const { appCase, cases, selectCase, currentUser, assignReviewer, notifications } = useApp();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -158,7 +158,7 @@ export const RegionalWorkspace: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-slate-500">1 Case Displayed</span>
+              <span className="text-xs font-mono text-slate-500">{cases.length} Cases Available</span>
             </div>
           </div>
 
@@ -166,50 +166,84 @@ export const RegionalWorkspace: React.FC = () => {
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3">Docket ID</th>
+                  <th className="px-4 py-3">Docket ID & Study</th>
                   <th className="px-4 py-3">Institution & Location</th>
                   <th className="px-4 py-3">Proposed Programme</th>
+                  <th className="px-4 py-3">Category</th>
                   <th className="px-4 py-3">Assigned Reviewer</th>
                   <th className="px-4 py-3">Workflow State</th>
                   <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                <tr className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-mono font-bold text-blue-900">{appCase.id}</td>
-                  <td className="px-4 py-3">
-                    <div className="font-semibold text-slate-900">{appCase.institutionName}</div>
-                    <div className="text-[11px] text-slate-500">{appCase.address}</div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-slate-800">{appCase.programme}</div>
-                    <div className="text-[11px] text-slate-500">Intake: {appCase.intakeProposed} Seats · {appCase.academicYear}</div>
-                  </td>
-                  <td className="px-4 py-3">
-                    {appCase.assignedReviewer ? (
-                      <span className="text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded font-medium border border-emerald-200 inline-block">
-                        {appCase.assignedReviewer}
-                      </span>
-                    ) : (
-                      <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded font-medium border border-amber-200 inline-block">
-                        Unassigned
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                      {appCase.status.replace(/_/g, ' ')}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right space-x-2">
-                    <button
-                      onClick={() => navigate('/regional/assignment')}
-                      className="px-2.5 py-1 bg-[#0F294A] hover:bg-[#0A1D36] text-white rounded text-[11px] font-semibold transition-colors"
-                    >
-                      Assign Reviewer
-                    </button>
-                  </td>
-                </tr>
+                {cases.map((c, idx) => {
+                  const isCurrent = c.id === appCase.id;
+                  return (
+                    <tr key={c.id} className={`hover:bg-slate-50 ${isCurrent ? 'bg-blue-50/50 font-medium' : ''}`}>
+                      <td className="px-4 py-3 font-mono font-bold text-blue-900">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[10px] bg-slate-200 text-slate-800 font-sans px-1.5 py-0.5 rounded font-bold">
+                            Case {idx + 1}
+                          </span>
+                          <span>{c.id}</span>
+                          {isCurrent && (
+                            <span className="text-[9px] bg-blue-700 text-white font-sans px-1.5 py-0.5 rounded font-semibold uppercase">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-semibold text-slate-900">{c.institutionName}</div>
+                        <div className="text-[11px] text-slate-500">{c.address}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-slate-800">{c.programme}</div>
+                        <div className="text-[11px] text-slate-500">Intake: {c.intakeProposed} Seats · {c.academicYear}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-[11px] text-slate-600 font-medium">
+                          {c.category.includes('New') ? 'New Institution' : 'Extension of Approval'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {c.assignedReviewer ? (
+                          <span className="text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded font-medium border border-emerald-200 inline-block">
+                            {c.assignedReviewer}
+                          </span>
+                        ) : (
+                          <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded font-medium border border-amber-200 inline-block">
+                            Unassigned
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                          {c.status.replace(/_/g, ' ')}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right space-x-2 whitespace-nowrap">
+                        {!isCurrent && (
+                          <button
+                            onClick={() => selectCase(c.id)}
+                            className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded text-[11px] font-semibold transition-colors"
+                          >
+                            Switch Docket
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            if (!isCurrent) selectCase(c.id);
+                            navigate('/regional/assignment');
+                          }}
+                          className="px-2.5 py-1 bg-[#0F294A] hover:bg-[#0A1D36] text-white rounded text-[11px] font-semibold transition-colors"
+                        >
+                          Assign Reviewer
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

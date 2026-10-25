@@ -17,6 +17,7 @@ import {
   INITIAL_APPLICATION,
   INITIAL_NOTIFICATIONS,
   INITIAL_WORKFLOW_REVISIONS,
+  ALL_CASES,
 } from '../../data/seedData';
 
 interface AppContextType {
@@ -24,6 +25,9 @@ interface AppContextType {
   loginAs: (userId: string) => void;
   logout: () => void;
   appCase: ApplicationCase;
+  cases: ApplicationCase[];
+  selectedCaseId: string;
+  selectCase: (caseId: string) => void;
   notifications: NotificationItem[];
   workflowRevisions: WorkflowRevision[];
   guidedStep: number;
@@ -91,7 +95,9 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const USER_STORAGE_KEY = 'aadhar_portal_user_id';
-const CASE_STORAGE_KEY = 'aadhar_portal_case_v3_bsiet';
+const CASES_STORAGE_KEY = 'nivaran_portal_cases_v1';
+const SELECTED_CASE_KEY = 'nivaran_portal_selected_case_v1';
+const CASE_STORAGE_KEY = 'aadhar_portal_case_v3_bsiet'; // kept for backward-compat reset
 const NOTIF_STORAGE_KEY = 'aadhar_portal_notifs_v2_bsiet';
 const WORKFLOW_STORAGE_KEY = 'aadhar_portal_workflows_v2_bsiet';
 const STEP_STORAGE_KEY = 'aadhar_portal_step_v2_bsiet';
@@ -119,47 +125,66 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return DEMO_USERS[0]; // Default to Regional Officer
   });
 
-  const [appCase, setAppCase] = useState<ApplicationCase>(() => {
+  // ── Multi-case state ──────────────────────────────────────────
+  const [cases, setCases] = useState<ApplicationCase[]>(() => {
     try {
-      const stored = localStorage.getItem(CASE_STORAGE_KEY);
+      const stored = localStorage.getItem(CASES_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        const restoredCase: ApplicationCase = {
-          ...INITIAL_APPLICATION,
-          ...parsed,
-          deadlines: parsed.deadlines || INITIAL_APPLICATION.deadlines,
-          undertakings: parsed.undertakings || INITIAL_APPLICATION.undertakings,
-          complianceRecords: parsed.complianceRecords || INITIAL_APPLICATION.complianceRecords,
-          escalations: parsed.escalations || INITIAL_APPLICATION.escalations,
-          processingRoute: parsed.processingRoute || INITIAL_APPLICATION.processingRoute,
-        };
-        const allClarificationsResolved = restoredCase.clarifications.length > 0 &&
-          restoredCase.clarifications.every((clarification) => clarification.status === 'RESOLVED');
-        const allDocumentsVerified = restoredCase.documents.length > 0 &&
-          restoredCase.documents.every((document) => document.status === 'VERIFIED');
-        return {
-          ...restoredCase,
-          decisionDetails: {
-            ...restoredCase.decisionDetails,
-            gatesPassed: {
-              ...restoredCase.decisionDetails.gatesPassed,
-              clarificationsResolved: allClarificationsResolved,
-              documentVerification: allDocumentsVerified,
-            },
-          },
-        };
+        if (Array.isArray(parsed)) {
+          const parsedIds = new Set(parsed.map((c: ApplicationCase) => c.id));
+          const missing = ALL_CASES.filter((c) => !parsedIds.has(c.id));
+          if (missing.length === 0) return parsed;
+          return [...parsed, ...missing];
+        }
       }
     } catch (e) {
-      console.warn('Failed to parse stored case', e);
+      console.warn('Failed to parse stored cases', e);
     }
-    return INITIAL_APPLICATION;
+    return ALL_CASES;
   });
+
+  const [selectedCaseId, setSelectedCaseId] = useState<string>(() => {
+    try {
+      const stored = localStorage.getItem(SELECTED_CASE_KEY);
+      if (stored) return stored;
+    } catch (e) {
+      // ignore
+    }
+    return INITIAL_APPLICATION.id;
+  });
+
+  // Derived: the currently active case object
+  const appCase: ApplicationCase =
+    cases.find((c) => c.id === selectedCaseId) ?? cases[0];
+
+  // Helper to update ONE case in the cases array
+  const setAppCase = (updater: (prev: ApplicationCase) => ApplicationCase) => {
+    setCases((prev) =>
+      prev.map((c) => (c.id === selectedCaseId ? updater(c) : c))
+    );
+  };
+
+  const selectCase = (caseId: string) => {
+    setSelectedCaseId(caseId);
+    try {
+      localStorage.setItem(SELECTED_CASE_KEY, caseId);
+    } catch (e) {
+      // ignore
+    }
+  };
 
   const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
     try {
       const stored = localStorage.getItem(NOTIF_STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const parsedIds = new Set(parsed.map((n: NotificationItem) => n.id));
+          const missing = INITIAL_NOTIFICATIONS.filter((n) => !parsedIds.has(n.id));
+          if (missing.length === 0) return parsed;
+          return [...parsed, ...missing];
+        }
       }
     } catch (e) {
       console.warn('Failed to parse notifications', e);
@@ -206,11 +231,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     try {
-      localStorage.setItem(CASE_STORAGE_KEY, JSON.stringify(appCase));
+      localStorage.setItem(CASES_STORAGE_KEY, JSON.stringify(cases));
     } catch (e) {
-      console.warn('Case sync failed', e);
+      console.warn('Cases sync failed', e);
     }
-  }, [appCase]);
+  }, [cases]);
 
   useEffect(() => {
     try {
@@ -890,13 +915,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const resetDemoState = () => {
     try {
       localStorage.removeItem(CASE_STORAGE_KEY);
+      localStorage.removeItem(CASES_STORAGE_KEY);
+      localStorage.removeItem(SELECTED_CASE_KEY);
       localStorage.removeItem(NOTIF_STORAGE_KEY);
       localStorage.removeItem(WORKFLOW_STORAGE_KEY);
       localStorage.removeItem(STEP_STORAGE_KEY);
     } catch (e) {
       // ignore
     }
-    setAppCase(INITIAL_APPLICATION);
+    setCases(ALL_CASES);
+    setSelectedCaseId(INITIAL_APPLICATION.id);
     setNotifications(INITIAL_NOTIFICATIONS);
     setWorkflowRevisions(INITIAL_WORKFLOW_REVISIONS);
     setGuidedStep(1);
@@ -995,6 +1023,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loginAs,
         logout,
         appCase,
+        cases,
+        selectedCaseId,
+        selectCase,
         notifications,
         workflowRevisions,
         guidedStep,

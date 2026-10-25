@@ -51,6 +51,18 @@ export const EvcWorkspace: React.FC = () => {
   const [obs1, setObs1] = useState('Continuous 7.5-acre boundary verified with geo-coordinates.');
   const [obs2, setObs2] = useState('Synthetic CSE department computer-lab evidence queued for physical or documentary verification.');
 
+  React.useEffect(() => {
+    if (appCase.id === 'NIVARAN-VESIT-2026-27') {
+      setTeamMembers('Prof. S. N. Merchant (IIT Bombay), Dr. Faruk Kazi (VJTI Mumbai)');
+      setObs1('Physical verification of VESIT Chembur campus: 3.2 acres continuous parcel in Collector Colony, Chembur verified.');
+      setObs2('Inspected 180 workstations across 3 computer laboratories and dedicated GPU server room. High-speed 1 Gbps lease line active.');
+    } else {
+      setTeamMembers('Prof. K. Ramanathan (IIT Bombay), Dr. Anita Deshmukh (COEP Pune)');
+      setObs1('Continuous 7.5-acre boundary verified with geo-coordinates.');
+      setObs2('Synthetic CSE department computer-lab evidence queued for physical or documentary verification.');
+    }
+  }, [appCase.id]);
+
   const handleSchedule = (e: React.FormEvent) => {
     e.preventDefault();
     const members = teamMembers.split(',').map((s) => s.trim());
@@ -154,7 +166,8 @@ export const EvcWorkspace: React.FC = () => {
         </div>
 
         <p className="text-xs text-slate-600 leading-relaxed">
-          As per APH 2026-27 Chapter II Clause 2.14, EVC is not mandatory for existing technical institutions unless specific physical ambiguities or random vigilance sampling occurs.
+          {appCase.evcDetails.reason ||
+            'As per APH 2026-27 Chapter II Clause 2.14, EVC is not mandatory for existing technical institutions unless specific physical ambiguities or random vigilance sampling occurs.'}
         </p>
       </div>
 

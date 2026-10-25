@@ -56,6 +56,22 @@ export const ReviewerWorkspace: React.FC = () => {
   );
   const [clrDays, setClrDays] = useState(7);
 
+  React.useEffect(() => {
+    if (appCase.id === 'NIVARAN-VESIT-2026-27') {
+      setClrTitle('Clarification: Sub-Registrar Lease Endorsement & Phase-1 Occupancy');
+      setClrCategory('Land & Statutory Approvals');
+      setClrQuestion(
+        'Please submit annual Sub-Registrar lease rent endorsement receipt and confirm instructional area segregation for 180 proposed seats per APH Chapter I Clause 1.8.'
+      );
+    } else {
+      setClrTitle('Clarification: departmental computer laboratory evidence');
+      setClrCategory('Computer Laboratory Evidence');
+      setClrQuestion(
+        'This simulated case cites AICTE Approval Process Handbook 2024–25 to 2026–27, Annexure 4, Section 4.1, pages 92–93. The synthetic inventory lists 16 department computers. Please provide updated inventory, installation records, availability evidence, and the programme-category basis for human verification. This is not a finding about the real institution.'
+      );
+    }
+  }, [appCase.id]);
+
   const handleCreateClarification = (e: React.FormEvent) => {
     e.preventDefault();
     const res = createClarificationRequest(clrTitle, clrCategory, clrQuestion, clrDays);
@@ -187,8 +203,8 @@ export const ReviewerWorkspace: React.FC = () => {
           </div>
 
           {(() => {
-            const computerEvidence = appCase.documents.find((doc) => doc.id === 'doc-004') || appCase.documents[0];
-            return computerEvidence ? <DocumentPreviewPanel document={computerEvidence} compact /> : null;
+            const previewDoc = appCase.documents.find((doc) => doc.id === 'doc-004' || doc.id === 'doc-vesit-001') || appCase.documents[0];
+            return previewDoc ? <DocumentPreviewPanel document={previewDoc} compact /> : null;
           })()}
 
           <div className="space-y-3">
